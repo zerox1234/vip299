@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIP299 – Aviator Game</title>
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#f2f2f2; text-align:center; }
+    header { background:#004080; color:white; padding:15px; font-size:22px; font-weight:bold; }
+    #container { width:90%; max-width:900px; margin:auto; padding:20px; }
+    .box { background:white; padding:15px; margin:15px 0; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.2); }
+    input, button, select { padding:8px; margin:5px; font-size:16px; border:1px solid #004080; border-radius:5px; }
+    button { cursor:pointer; background:#004080; color:white; transition:0.3s; }
+    button:hover { background:#0073e6; }
+    canvas { border:2px solid #000; margin-top:15px; background:linear-gradient(to top, #87ceeb, #c0f0ff); }
+    .support a { display:inline-block; margin:5px; padding:10px 15px; border-radius:5px; text-decoration:none; color:white; }
+    .whatsapp { background:#25D366; }
+    .sms { background:#0073e6; }
+  </style>
+</head>
+<body>
+
+<header>VIP299 – Pro Aviator Game</header>
+
+<div id="container">
+
+  <!-- Login/Register -->
+  <div class="box">
+    <h2>Login / Register</h2>
+    <input type="text" id="username" placeholder="Username"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button onclick="register()">Register (Bonus 90 BDT)</button>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- Credit Info -->
+  <div class="box">
+    <h3 id="credit">Balance: 0 BDT</h3>
+    <h3 id="referral">Referral Bonus: 299 BDT (10x Turnover Rule)</h3>
+  </div>
+
+  <!-- Deposit -->
+  <div class="box">
+    <h2>Deposit</h2>
+    <p>Choose Amount:</p>
+    <select id="depositAmount">
+      <option value="100">100 BDT</option>
+      <option value="300">300 BDT</option>
+      <option value="1000">1000 BDT</option>
+      <option value="10000">10000 BDT</option>
+      <option value="50000">50000 BDT</option>
+    </select><br>
+    <p>Payment Methods:</p>
+    <button onclick="deposit()">Nagad</button>
+    <button onclick="deposit()">bKash</button>
+    <button onclick="deposit()">Rocket</button>
+    <p>Send money to: <b>01617659169</b></p>
+  </div>
+
+  <!-- Withdrawal -->
+  <div class="box">
+    <h2>Withdrawal</h2>
+    <input type="number" id="withdrawAmount" placeholder="Minimum 500 BDT"><br>
+    <button onclick="withdraw()">Withdraw</button>
+  </div>
+
+  <!-- Game -->
+  <div class="box">
+    <h2>Aviator Game</h2>
+    <canvas id="gameCanvas" width="800" height="450"></canvas><br>
+    Bet: <input type="number" id="betAmount" value="10" min="1">
+    <button onclick="placeBet()">Place Bet</button>
+    <p id="score">Score: 0</p>
+  </div>
+
+  <!-- Support -->
+  <div class="box support">
+    <h2>Support</h2>
+    <a class="whatsapp" href="https://wa.me/8801617659169?text=Hi%20VIP299,%20I%20need%20help" target="_blank">WhatsApp</a>
+    <a class="sms" href="sms:+8801617659169?body=Hi%20VIP299,%20I%20need%20help">SMS</a>
+  </div>
+
+</div>
+
+<script>
+let users = {};
+let currentUser = null;
+let balance = 0;
+let bet = 0;
+let score = 0;
+let gameOver = false;
+
+function register(){
+  let user = document.getElementById('username').value;
+  let pass = document.getElementById('password').value;
+  if(users[user]){ alert("Already registered"); return; }
+  users[user] = {password:pass, balance:90};
+  alert("Registration successful! Bonus 90 BDT added.");
+}
+
+function login(){
+  let user = document.getElementById('username').value;
+  let pass = document.getElementById('password').value;
+  if(users[user] && users[user].password===pass){
+    currentUser = user;
+    balance = users[user].balance;
+    document.getElementById('credit').innerText = "Balance: "+balance+" BDT";
+    alert("Welcome "+user+"!");
+  } else {
+    alert("Invalid login");
+  }
+}
+
+function deposit(){
+  if(!currentUser){ alert("Login first"); return; }
+  let amount = document.getElementById('depositAmount').value;
+  alert("Deposit request for "+amount+" BDT submitted. Send to 01617659169.");
+}
+
+function withdraw(){
+  if(!currentUser){ alert("Login first"); return; }
+  let amount = parseInt(document.getElementById('withdrawAmount').value);
+  if(amount<500){ alert("Minimum 500 BDT required"); return; }
+  if(amount>balance){ alert("Not enough balance"); return; }
+  balance -= amount;
+  users[currentUser].balance = balance;
+  document.getElementById('credit').innerText = "Balance: "+balance+" BDT";
+  alert("Withdrawal request of "+amount+" BDT submitted.");
+}
+
+function placeBet(){
+  if(!currentUser){ alert("Login first"); return; }
+  bet = parseInt(document.getElementById('betAmount').value);
+  if(bet>balance){ alert("Not enough balance"); return; }
+  alert("Bet placed: "+bet+" BDT");
+}
+
+// Game
+const canvas=document.getElementById('gameCanvas');
+const ctx=canvas.getContext('2d');
+let plane={x:50,y:200,dy:0,width:40,height:20};
+let gravity=0.5;
+let obstacles=[];
+let frame=0;
+
+document.addEventListener('keydown', e=>{
+  if(e.code==="Space") plane.dy=-8;
+});
+
+function createObstacle(){
+  let gap=140;
+  let h=Math.random()*(canvas.height-gap-50)+25;
+  obstacles.push({x:canvas.width,y:0,w:40,h:h});
+  obstacles.push({x:canvas.width,y:h+gap,w:40,h:canvas.height-h-gap});
+}
+
+function drawPlane(){
+  ctx.fillStyle="red";
+  ctx.fillRect(plane.x,plane.y,plane.width,plane.height);
+}
+
+function drawObs(){
+  ctx.fillStyle="green";
+  obstacles.forEach(o=>ctx.fillRect(o.x,o.y,o.w,o.h));
+}
+
+function checkCollision(){
+  for(let o of obstacles){
+    if(plane.x<o.x+o.w && plane.x+plane.width>o.x && plane.y<o.y+o.h && plane.y+plane.height>o.y){
+      gameOver=true;
+    }
+  }
+  if(plane.y<0||plane.y+plane.height>canvas.height) gameOver=true;
+}
+
+function gameLoop(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  frame++;
+  plane.dy+=gravity; plane.y+=plane.dy;
+  if(frame%100===0) createObstacle();
+  obstacles.forEach(o=>o.x-=3);
+  obstacles=obstacles.filter(o=>o.x+o.w>0);
+  drawPlane(); drawObs(); checkCollision();
+  if(gameOver){
+    if(bet>0){
+      if(score>=150){ balance+=bet; alert("You Won!"); }
+      else{ balance-=bet; alert("You Lost!"); }
+      users[currentUser].balance=balance;
+      document.getElementById('credit').innerText="Balance: "+balance+" BDT";
+      bet=0;
+    }
+    plane.y=200; plane.dy=0; obstacles=[]; score=0; gameOver=false;
+  } else {
+    score++;
+    document.getElementById('score').innerText="Score: "+score;
+  }
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
+</script>
+
+</body>
+</html>
